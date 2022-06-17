@@ -46,9 +46,9 @@ type writer func(reflect.Value, *encBuffer) error
 
 var theTC = newTypeCache()
 
+//Map的key是类型，value是对应的编码和解码器。
 type typeCache struct {
-	cur atomic.Value
-
+	cur atomic.Value //原子操作 (保证并发安全)
 	// This lock synchronizes writers.
 	mu   sync.Mutex
 	next map[typekey]*typeinfo
@@ -70,6 +70,7 @@ func cachedWriter(typ reflect.Type) (writer, error) {
 	return info.writer, info.writerErr
 }
 
+//
 func (c *typeCache) info(typ reflect.Type) *typeinfo {
 	key := typekey{Type: typ}
 	if info := c.cur.Load().(map[typekey]*typeinfo)[key]; info != nil {
@@ -112,6 +113,8 @@ func (c *typeCache) infoWhileGenerating(typ reflect.Type, tags rlpstruct.Tags) *
 	// Put a dummy value into the cache before generating.
 	// If the generator tries to lookup itself, it will get
 	// the dummy value and won't call itself recursively.
+	// 在生成之前，将一个虚拟值放入缓存。
+	// 如果生成器试图查找自己，它将得到哑值，不会递归调用自己。
 	info := new(typeinfo)
 	c.next[key] = info
 	info.generate(typ, tags)
@@ -124,7 +127,8 @@ type field struct {
 	optional bool
 }
 
-// structFields resolves the typeinfo of all public fields in a struct type.
+// structFielxds resolves the typeinfo of all public fields in a struct type.
+// structFields解析struct类型中所有公共字段的类型信息。
 func structFields(typ reflect.Type) (fields []field, err error) {
 	// Convert fields to rlpstruct.Field.
 	var allStructFields []rlpstruct.Field

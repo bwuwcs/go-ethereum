@@ -132,6 +132,7 @@ func puthead(buf []byte, smalltag, largetag byte, size uint64) int {
 var encoderInterface = reflect.TypeOf(new(Encoder)).Elem()
 
 // makeWriter creates a writer function for the given type.
+// 根据参数的类型分配处理函数
 func makeWriter(typ reflect.Type, ts rlpstruct.Tags) (writer, error) {
 	kind := typ.Kind()
 	switch {
@@ -316,6 +317,7 @@ func makeSliceWriter(typ reflect.Type, ts rlpstruct.Tags) (writer, error) {
 }
 
 func makeStructWriter(typ reflect.Type) (writer, error) {
+	// 把结构体扁平化生一个fields数组，每个元素都有对应的编码器
 	fields, err := structFields(typ)
 	if err != nil {
 		return nil, err
@@ -333,6 +335,7 @@ func makeStructWriter(typ reflect.Type) (writer, error) {
 		writer = func(val reflect.Value, w *encBuffer) error {
 			lh := w.list()
 			for _, f := range fields {
+				//f是field结构， f.info是typeinfo的指针， 所以这里其实是调用字段的编码器方法。
 				if err := f.info.writer(val.Field(f.index), w); err != nil {
 					return err
 				}

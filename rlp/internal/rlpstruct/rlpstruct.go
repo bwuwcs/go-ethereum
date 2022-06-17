@@ -65,12 +65,16 @@ const (
 // Tags represents struct tags.
 type Tags struct {
 	// rlp:"nil" controls whether empty input results in a nil pointer.
+	// "nil"控制空输入是否会导致nil指针。
 	// nilKind is the kind of empty value allowed for the field.
+	// nilKind是字段允许的一种空值。
 	NilKind NilKind
 	NilOK   bool
 
 	// rlp:"optional" allows for a field to be missing in the input list.
+	// Rlp:"optional"允许输入列表中缺少一个字段。
 	// If this is set, all subsequent fields must also be optional.
+	// 如果设置了此选项，那么所有后续字段也必须是可选的。
 	Optional bool
 
 	// rlp:"tail" controls whether this field swallows additional list elements. It can
