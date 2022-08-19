@@ -46,32 +46,37 @@ var (
 
 	// ErrAccountAlreadyExists is returned if an account attempted to import is
 	// already present in the keystore.
+	// 如果尝试导入的帐户已存在于密钥库中，则返回 ErrAccountAlreadyExists。
 	ErrAccountAlreadyExists = errors.New("account already exists")
 )
 
 // KeyStoreType is the reflect type of a keystore backend.
+// KeyStoreType是密钥存储库后端的反射类型。
 var KeyStoreType = reflect.TypeOf(&KeyStore{})
 
 // KeyStoreScheme is the protocol scheme prefixing account and wallet URLs.
+// KeyStoreScheme是帐户和钱包url前缀的协议方案。
 const KeyStoreScheme = "keystore"
 
 // Maximum time between wallet refreshes (if filesystem notifications don't work).
+// 钱包刷新之间的最大时间间隔(如果文件系统通知不起作用)。
 const walletRefreshCycle = 3 * time.Second
 
 // KeyStore manages a key storage directory on disk.
+// KeyStore管理磁盘上的密钥存储目录。
 type KeyStore struct {
-	storage  keyStore                     // Storage backend, might be cleartext or encrypted
-	cache    *accountCache                // In-memory account cache over the filesystem storage
-	changes  chan struct{}                // Channel receiving change notifications from the cache
-	unlocked map[common.Address]*unlocked // Currently unlocked account (decrypted private keys)
+	storage  keyStore                     // Storage backend, might be cleartext or encrypted		存储后端，可能是明文或加密
+	cache    *accountCache                // In-memory account cache over the filesystem storage	通过文件系统存储的内存帐户缓存
+	changes  chan struct{}                // Channel receiving change notifications from the cache	通道从缓存接收更改通知
+	unlocked map[common.Address]*unlocked // Currently unlocked account (decrypted private keys)	当前解锁的账户（解密的私钥）
 
-	wallets     []accounts.Wallet       // Wallet wrappers around the individual key files
-	updateFeed  event.Feed              // Event feed to notify wallet additions/removals
-	updateScope event.SubscriptionScope // Subscription scope tracking current live listeners
-	updating    bool                    // Whether the event notification loop is running
+	wallets     []accounts.Wallet       // Wallet wrappers around the individual key files			单个密钥文件周围的钱包包装器
+	updateFeed  event.Feed              // Event feed to notify wallet additions/removals			通知钱包添加删除的事件提要
+	updateScope event.SubscriptionScope // Subscription scope tracking current live listeners		订阅范围跟踪当前的现场听众
+	updating    bool                    // Whether the event notification loop is running			事件通知循环是否正在运行
 
 	mu       sync.RWMutex
-	importMu sync.Mutex // Import Mutex locks the import to prevent two insertions from racing
+	importMu sync.Mutex // Import Mutex locks the import to prevent two insertions from racing		Import Mutex 锁定导入以防止两个插入竞争
 }
 
 type unlocked struct {
@@ -80,6 +85,7 @@ type unlocked struct {
 }
 
 // NewKeyStore creates a keystore for the given directory.
+// NewKeyStore 为给定目录创建一个密钥库。
 func NewKeyStore(keydir string, scryptN, scryptP int) *KeyStore {
 	keydir, _ = filepath.Abs(keydir)
 	ks := &KeyStore{storage: &keyStorePassphrase{keydir, scryptN, scryptP, false}}

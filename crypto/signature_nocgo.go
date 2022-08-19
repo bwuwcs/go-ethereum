@@ -25,7 +25,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/btcsuite/btcd/btcec/v2"
 	btc_ecdsa "github.com/btcsuite/btcd/btcec/v2/ecdsa"
 )
 
@@ -44,6 +43,7 @@ func sigToPub(hash, sig []byte) (*btcec.PublicKey, error) {
 		return nil, errors.New("invalid signature")
 	}
 	// Convert to btcec input format with 'recovery id' v at the beginning.
+	// 转换为开头带有“recovery id”v 的 btcec 输入格式。
 	btcsig := make([]byte, SignatureLength)
 	btcsig[0] = sig[RecoveryIDOffset] + 27
 	copy(btcsig[1:], sig)
@@ -87,6 +87,7 @@ func Sign(hash []byte, prv *ecdsa.PrivateKey) ([]byte, error) {
 		return nil, err
 	}
 	// Convert to Ethereum signature format with 'recovery id' v at the end.
+	// 转换为最后带有“recovery id”v 的以太坊签名格式。
 	v := sig[0] - 27
 	copy(sig, sig[1:])
 	sig[RecoveryIDOffset] = v

@@ -28,11 +28,15 @@ import (
 // DefaultRootDerivationPath is the root path to which custom derivation endpoints
 // are appended. As such, the first account will be at m/44'/60'/0'/0, the second
 // at m/44'/60'/0'/1, etc.
+// DefaultRootDerivationPath 是附加自定义派生端点的根路径。
+// 因此，第一个帐户将位于 m44'60'0'0，第二个帐户将位于 m44'60'0'1，以此类推。
 var DefaultRootDerivationPath = DerivationPath{0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0, 0}
 
 // DefaultBaseDerivationPath is the base path from which custom derivation endpoints
 // are incremented. As such, the first account will be at m/44'/60'/0'/0/0, the second
 // at m/44'/60'/0'/0/1, etc.
+// DefaultBaseDerivationPath 是自定义派生端点递增的基本路径。
+// 因此，第一个帐户位于 m44'60'0'00，第二个帐户位于 m44'60'0'01，以此类推。
 var DefaultBaseDerivationPath = DerivationPath{0x80000000 + 44, 0x80000000 + 60, 0x80000000 + 0, 0, 0}
 
 // LegacyLedgerBaseDerivationPath is the legacy base path from which custom derivation

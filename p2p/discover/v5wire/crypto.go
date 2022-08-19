@@ -94,6 +94,7 @@ type s256raw []byte
 func (s256raw) ENRKey() string { return "secp256k1" }
 
 // verifyIDSignature checks that signature over idnonce was made by the given node.
+// erifyIDSignature 检查 idnonce 上的签名是否由给定节点生成。
 func verifyIDSignature(hash hash.Hash, sig []byte, n *enode.Node, challenge, ephkey []byte, destID enode.ID) error {
 	switch idscheme := n.Record().IdentityScheme(); idscheme {
 	case "v4":

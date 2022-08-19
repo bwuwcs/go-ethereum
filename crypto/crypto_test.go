@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"crypto/ecdsa"
 	"encoding/hex"
+	"fmt"
 	"math/big"
 	"os"
 	"reflect"
@@ -31,6 +32,15 @@ import (
 
 var testAddrHex = "970e8128ab834e8eac17ab8e3812f010678cf791"
 var testPrivHex = "289c2857d4598e37fb9647507e47a309d6133539bf21a8b9cb6df88fd5232032"
+
+// 测试 通过私钥生成公钥
+func TestToECDSA(t *testing.T) {
+	proviceHex := "15543933878a0cfc72343a7328991ea402d6fea1627579e5d41324ebb01d4a2b"
+	key, _ := HexToECDSA(proviceHex)
+	pubKey := append(key.PublicKey.X.Bytes(), key.PublicKey.Y.Bytes()...)
+	fmt.Println("priLey:", hex.EncodeToString(key.D.Bytes()))
+	fmt.Println("pubKey:", hex.EncodeToString(pubKey))
+}
 
 // These tests are sanity checks.
 // They should ensure that we don't e.g. use Sha3-224 instead of Sha3-256

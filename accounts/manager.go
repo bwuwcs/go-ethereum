@@ -27,29 +27,36 @@ import (
 
 // managerSubBufferSize determines how many incoming wallet events
 // the manager will buffer in its channel.
+// managerSubBufferSize 确定经理将在其通道中缓冲多少传入的钱包事件。
 const managerSubBufferSize = 50
 
 // Config contains the settings of the global account manager.
+// Config 包含全局客户经理的设置。
 //
 // TODO(rjl493456442, karalabe, holiman): Get rid of this when account management
+// 帐户管理时摆脱这个
 // is removed in favor of Clef.
+// 被删除以支持 Clef。
 type Config struct {
 	InsecureUnlockAllowed bool // Whether account unlocking in insecure environment is allowed
+	// 是否允许在不安全的环境中解锁账户
 }
 
 // newBackendEvent lets the manager know it should
 // track the given backend for wallet updates.
+// newBackendEvent 让经理知道它应该跟踪给定的后端以进行钱包更新。
 type newBackendEvent struct {
 	backend   Backend
-	processed chan struct{} // Informs event emitter that backend has been integrated
+	processed chan struct{} // Informs event emitter that backend has been integrated	通知事件发射器后端已集成
 }
 
 // Manager is an overarching account manager that can communicate with various
 // backends for signing transactions.
+// Manager 是一个总体客户经理，可以与各种后端进行通信以签署交易。
 type Manager struct {
-	config      *Config                    // Global account manager configurations
-	backends    map[reflect.Type][]Backend // Index of backends currently registered
-	updaters    []event.Subscription       // Wallet update subscriptions for all backends
+	config      *Config                    // Global account manager configurations		全局客户经理配置
+	backends    map[reflect.Type][]Backend // Index of backends currently registered	当前注册的后端索引
+	updaters    []event.Subscription       // Wallet update subscriptions for all backends		所有后端的钱包更新订阅
 	updates     chan WalletEvent           // Subscription sink for backend wallet changes
 	newBackends chan newBackendEvent       // Incoming backends to be tracked by the manager
 	wallets     []Wallet                   // Cache of all wallets from all registered backends

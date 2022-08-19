@@ -36,6 +36,8 @@ import (
 // Minimum amount of time between cache reloads. This limit applies if the platform does
 // not support change notifications. It also applies if the keystore directory does not
 // exist yet, the code will attempt to create a watcher at most this often.
+// 缓存重新加载之间的最短时间。如果平台不支持更改通知，则适用此限制。
+// 如果 keystore 目录还不存在，它也适用，代码最多会尝试创建一个观察者。
 const minReloadInterval = 2 * time.Second
 
 type accountsByURL []accounts.Account
@@ -45,7 +47,9 @@ func (s accountsByURL) Less(i, j int) bool { return s[i].URL.Cmp(s[j].URL) < 0 }
 func (s accountsByURL) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 
 // AmbiguousAddrError is returned when attempting to unlock
+// 尝试解锁时返回 AmbiguousAddrError
 // an address for which more than one file exists.
+// 存在多个文件的地址。
 type AmbiguousAddrError struct {
 	Addr    common.Address
 	Matches []accounts.Account

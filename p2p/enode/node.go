@@ -139,6 +139,7 @@ func (n *Node) Pubkey() *ecdsa.PublicKey {
 
 // Record returns the node's record. The return value is a copy and may
 // be modified by the caller.
+// Record 返回节点的记录。返回值是一个副本，可以由调用者修改。
 func (n *Node) Record() *enr.Record {
 	cpy := n.r
 	return &cpy

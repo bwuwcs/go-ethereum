@@ -252,6 +252,7 @@ func decodeRecord(s *rlp.Stream) (dec Record, raw []byte, err error) {
 }
 
 // IdentityScheme returns the name of the identity scheme in the record.
+// IdentityScheme 返回记录中身份方案的名称。
 func (r *Record) IdentityScheme() string {
 	var id ID
 	r.Load(&id)

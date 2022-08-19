@@ -6,6 +6,7 @@
 // +build !gofuzz,cgo
 
 // Package secp256k1 wraps the bitcoin secp256k1 C library.
+// 包 secp256k1 包装了比特币 secp256k1 C 库。
 package secp256k1
 
 /*
@@ -63,10 +64,14 @@ var (
 
 // Sign creates a recoverable ECDSA signature.
 // The produced signature is in the 65-byte [R || S || V] format where V is 0 or 1.
+// Sign 创建一个可恢复的 ECDSA 签名。
+// 生成的签名是 65 字节的 [R ||小号 || V] 格式，其中 V 为 0 或 1。
 //
 // The caller is responsible for ensuring that msg cannot be chosen
 // directly by an attacker. It is usually preferable to use a cryptographic
 // hash function on any input before handing it to this function.
+// 调用者负责确保 msg 不能被攻击者直接选择。
+// 在将任何输入交给此函数之前，通常最好对任何输入使用加密散列函数。
 func Sign(msg []byte, seckey []byte) ([]byte, error) {
 	if len(msg) != 32 {
 		return nil, ErrInvalidMsgLen
@@ -102,6 +107,8 @@ func Sign(msg []byte, seckey []byte) ([]byte, error) {
 // msg must be the 32-byte hash of the message to be signed.
 // sig must be a 65-byte compact ECDSA signature containing the
 // recovery id as the last element.
+// RecoverPubkey 返回签名者的公钥。 msg 必须是要签名的消息的 32 字节哈希。
+// sig 必须是一个65字节的紧凑型ECDSA签名，其中包含作为最后一个元素的恢复ID。
 func RecoverPubkey(msg []byte, sig []byte) ([]byte, error) {
 	if len(msg) != 32 {
 		return nil, ErrInvalidMsgLen
@@ -123,6 +130,7 @@ func RecoverPubkey(msg []byte, sig []byte) ([]byte, error) {
 
 // VerifySignature checks that the given pubkey created signature over message.
 // The signature should be in [R || S] format.
+// VerifySignature 检查给定的公钥是否在消息上创建了签名。签名应该在 [R || S] 格式。
 func VerifySignature(pubkey, msg, signature []byte) bool {
 	if len(msg) != 32 || len(signature) != 64 || len(pubkey) == 0 {
 		return false

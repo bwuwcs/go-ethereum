@@ -216,6 +216,7 @@ type BlockChain struct {
 // NewBlockChain returns a fully initialised block chain using information
 // available in the database. It initialises the default Ethereum Validator
 // and Processor.
+// NewBlockChain 使用数据库中可用的信息返回一个完全初始化的区块链。它初始化默认的以太坊验证器和处理器。
 func NewBlockChain(db ethdb.Database, cacheConfig *CacheConfig, chainConfig *params.ChainConfig, engine consensus.Engine, vmConfig vm.Config, shouldPreserve func(header *types.Header) bool, txLookupLimit *uint64) (*BlockChain, error) {
 	if cacheConfig == nil {
 		cacheConfig = defaultCacheConfig
@@ -1180,6 +1181,8 @@ var lastWrite uint64
 // writeBlockWithoutState writes only the block and its metadata to the database,
 // but does not write any state. This is used to construct competing side forks
 // up to the point where they exceed the canonical total difficulty.
+// writeBlockWithoutState 仅将块及其元数据写入数据库，但不写入任何状态。
+// 这用于构建竞争侧叉，直到它们超过规范的总难度。
 func (bc *BlockChain) writeBlockWithoutState(block *types.Block, td *big.Int) (err error) {
 	if bc.insertStopped() {
 		return errInsertionInterrupted
@@ -1196,6 +1199,7 @@ func (bc *BlockChain) writeBlockWithoutState(block *types.Block, td *big.Int) (e
 
 // writeKnownBlock updates the head block flag with a known block
 // and introduces chain reorg if necessary.
+// writeKnownBlock 使用已知块更新头块标志，并在必要时引入链重组。
 func (bc *BlockChain) writeKnownBlock(block *types.Block) error {
 	current := bc.CurrentBlock()
 	if block.ParentHash() != current.Hash() {
@@ -1209,6 +1213,7 @@ func (bc *BlockChain) writeKnownBlock(block *types.Block) error {
 
 // writeBlockWithState writes block, metadata and corresponding state data to the
 // database.
+// writeBlockWithState 将块、元数据和相应的状态数据写入数据库。
 func (bc *BlockChain) writeBlockWithState(block *types.Block, receipts []*types.Receipt, logs []*types.Log, state *state.StateDB) error {
 	// Calculate the total difficulty of the block
 	ptd := bc.GetTd(block.ParentHash(), block.NumberU64()-1)
@@ -1371,8 +1376,11 @@ func (bc *BlockChain) addFutureBlock(block *types.Block) error {
 // chain or, otherwise, create a fork. If an error is returned it will return
 // the index number of the failing block as well an error describing what went
 // wrong. After insertion is done, all accumulated events will be fired.
+// InsertChain 尝试将给定批次的块插入到规范链中，否则，创建一个分叉。
+// 如果返回错误，它将返回失败块的索引号以及描述错误的错误。插入完成后，所有累积的事件都将被触发。
 func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 	// Sanity check that we have something meaningful to import
+	// 健全性检查我们是否有一些有意义的东西要导入
 	if len(chain) == 0 {
 		return 0, nil
 	}
@@ -1380,6 +1388,7 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 	defer bc.blockProcFeed.Send(false)
 
 	// Do a sanity check that the provided chain is actually ordered and linked.
+	// 对提供的链进行健全性检查，确保其实际上是有序和链接的。
 	for i := 1; i < len(chain); i++ {
 		block, prev := chain[i], chain[i-1]
 		if block.NumberU64() != prev.NumberU64()+1 || block.ParentHash() != prev.Hash() {
@@ -1395,6 +1404,7 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 		}
 	}
 	// Pre-checks passed, start the full block imports
+	// 预检查通过，开始全块导入
 	if !bc.chainmu.TryLock() {
 		return 0, errChainStopped
 	}
@@ -1404,19 +1414,24 @@ func (bc *BlockChain) InsertChain(chain types.Blocks) (int, error) {
 
 // insertChain is the internal implementation of InsertChain, which assumes that
 // 1) chains are contiguous, and 2) The chain mutex is held.
+// insertChain是InsertChain的内部实现，它假设 1) 链是连续的，并且 2) 链互斥锁被持有。
 //
 // This method is split out so that import batches that require re-injecting
 // historical blocks can do so without releasing the lock, which could lead to
 // racey behaviour. If a sidechain import is in progress, and the historic state
 // is imported, but then new canon-head is added before the actual sidechain
 // completes, then the historic state could be pruned again
+// 此方法被拆分，以便需要重新注入历史块的导入批次可以在不释放锁的情况下这样做，这可能会导致异常行为。
+// 如果正在导入侧链，并且导入了历史状态，但在实际侧链完成之前添加了新的 canon-head，则可以再次修剪历史状态
 func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals, setHead bool) (int, error) {
 	// If the chain is terminating, don't even bother starting up.
+	// 如果链是终止的，就不用开始了。
 	if bc.insertStopped() {
 		return 0, nil
 	}
 
 	// Start a parallel signature recovery (signer will fluke on fork transition, minimal perf loss)
+	// 启动并行签名恢复(签署人会在分叉转换上侥幸，最小的穿孔损失)
 	senderCacher.recoverFromBlocks(types.MakeSigner(bc.chainConfig, chain[0].Number()), chain)
 
 	var (
@@ -1424,6 +1439,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, verifySeals, setHead bool)
 		lastCanon *types.Block
 	)
 	// Fire a single chain head event if we've progressed the chain
+	// 如果我们已经推进了链，则触发单个链头事件
 	defer func() {
 		if lastCanon != nil && bc.CurrentBlock().Hash() == lastCanon.Hash() {
 			bc.chainHeadFeed.Send(ChainHeadEvent{lastCanon})

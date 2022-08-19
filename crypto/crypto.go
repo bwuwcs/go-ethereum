@@ -36,12 +36,15 @@ import (
 )
 
 //SignatureLength indicates the byte length required to carry a signature with recovery id.
+// SignatureLength 表示携带带有recovery id的签名所需的字节长度。
 const SignatureLength = 64 + 1 // 64 bytes ECDSA signature + 1 byte recovery id
 
 // RecoveryIDOffset points to the byte offset within the signature that contains the recovery id.
+// RecoveryIDOffset 指向包含恢复 id 的签名中的字节偏移量。
 const RecoveryIDOffset = 64
 
 // DigestLength sets the signature digest exact length
+// DigestLength 设置签名摘要的确切长度
 const DigestLength = 32
 
 var (
@@ -52,19 +55,23 @@ var (
 var errInvalidPubkey = errors.New("invalid secp256k1 public key")
 
 // KeccakState wraps sha3.state. In addition to the usual hash methods, it also supports
+// KeccakState 包装了 sha3.state。除了通常的哈希方法，它还支持
 // Read to get a variable amount of data from the hash state. Read is faster than Sum
 // because it doesn't copy the internal state, but also modifies the internal state.
+// 读取以从哈希状态中获取可变数量的数据。Read比Sum快，因为它不复制内部状态，但也会修改内部状态。
 type KeccakState interface {
 	hash.Hash
 	Read([]byte) (int, error)
 }
 
 // NewKeccakState creates a new KeccakState
+// NewKeccakState 创建一个新的 KeccakState
 func NewKeccakState() KeccakState {
 	return sha3.NewLegacyKeccak256().(KeccakState)
 }
 
 // HashData hashes the provided data using the KeccakState and returns a 32 byte hash
+// HashData 使用 KeccakState 对提供的数据进行散列，并返回一个 32 字节的散列
 func HashData(kh KeccakState, data []byte) (h common.Hash) {
 	kh.Reset()
 	kh.Write(data)
@@ -73,6 +80,7 @@ func HashData(kh KeccakState, data []byte) (h common.Hash) {
 }
 
 // Keccak256 calculates and returns the Keccak256 hash of the input data.
+// Keccak256 计算并返回输入数据的 Keccak256 哈希。
 func Keccak256(data ...[]byte) []byte {
 	b := make([]byte, 32)
 	d := NewKeccakState()
@@ -85,6 +93,7 @@ func Keccak256(data ...[]byte) []byte {
 
 // Keccak256Hash calculates and returns the Keccak256 hash of the input data,
 // converting it to an internal Hash data structure.
+// Keccak256Hash 计算并返回输入数据的 Keccak256 哈希，将其转换为内部 Hash 数据结构。
 func Keccak256Hash(data ...[]byte) (h common.Hash) {
 	d := NewKeccakState()
 	for _, b := range data {
@@ -95,6 +104,7 @@ func Keccak256Hash(data ...[]byte) (h common.Hash) {
 }
 
 // Keccak512 calculates and returns the Keccak512 hash of the input data.
+// Keccak512计算并返回输入数据的Keccak512哈希值。
 func Keccak512(data ...[]byte) []byte {
 	d := sha3.NewLegacyKeccak512()
 	for _, b := range data {
@@ -104,6 +114,7 @@ func Keccak512(data ...[]byte) []byte {
 }
 
 // CreateAddress creates an ethereum address given the bytes and the nonce
+// CreateAddress创建一个给定字节和nonce的以太坊地址
 func CreateAddress(b common.Address, nonce uint64) common.Address {
 	data, _ := rlp.EncodeToBytes([]interface{}{b, nonce})
 	return common.BytesToAddress(Keccak256(data)[12:])
@@ -111,11 +122,13 @@ func CreateAddress(b common.Address, nonce uint64) common.Address {
 
 // CreateAddress2 creates an ethereum address given the address bytes, initial
 // contract code hash and a salt.
+// CreateAddress2 在给定地址字节、初始合约代码哈希和盐的情况下创建一个以太坊地址。
 func CreateAddress2(b common.Address, salt [32]byte, inithash []byte) common.Address {
 	return common.BytesToAddress(Keccak256([]byte{0xff}, b.Bytes(), salt[:], inithash)[12:])
 }
 
 // ToECDSA creates a private key with the given D value.
+// ToECDSA 使用给定的 D 值创建一个私钥。
 func ToECDSA(d []byte) (*ecdsa.PrivateKey, error) {
 	return toECDSA(d, true)
 }
@@ -131,6 +144,7 @@ func ToECDSAUnsafe(d []byte) *ecdsa.PrivateKey {
 // toECDSA creates a private key with the given D value. The strict parameter
 // controls whether the key's length should be enforced at the curve size or
 // it can also accept legacy encodings (0 prefixes).
+// toECDSA 创建具有给定 D 值的私钥。 strict 参数控制键的长度是否应该在曲线大小上强制执行，或者它也可以接受传统编码（0 前缀）。
 func toECDSA(d []byte, strict bool) (*ecdsa.PrivateKey, error) {
 	priv := new(ecdsa.PrivateKey)
 	priv.PublicKey.Curve = S256()
@@ -156,6 +170,7 @@ func toECDSA(d []byte, strict bool) (*ecdsa.PrivateKey, error) {
 }
 
 // FromECDSA exports a private key into a binary dump.
+// FromECDSA 将私钥导出到二进制转储中。
 func FromECDSA(priv *ecdsa.PrivateKey) []byte {
 	if priv == nil {
 		return nil
@@ -164,6 +179,7 @@ func FromECDSA(priv *ecdsa.PrivateKey) []byte {
 }
 
 // UnmarshalPubkey converts bytes to a secp256k1 public key.
+// UnmarshalPubkey 将字节转换为 secp256k1 公钥。
 func UnmarshalPubkey(pub []byte) (*ecdsa.PublicKey, error) {
 	x, y := elliptic.Unmarshal(S256(), pub)
 	if x == nil {

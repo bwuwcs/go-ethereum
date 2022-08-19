@@ -39,9 +39,11 @@ var (
 // A BlockNonce is a 64-bit hash which proves (combined with the
 // mix-hash) that a sufficient amount of computation has been carried
 // out on a block.
+// BlockNonce 是一个 64 位散列，它证明（结合混合散列）已经在一个块上执行了足够数量的计算。
 type BlockNonce [8]byte
 
 // EncodeNonce converts the given integer to a block nonce.
+// EncodeNonce 将给定的整数转换为块随机数。
 func EncodeNonce(i uint64) BlockNonce {
 	var n BlockNonce
 	binary.BigEndian.PutUint64(n[:], i)
@@ -49,11 +51,13 @@ func EncodeNonce(i uint64) BlockNonce {
 }
 
 // Uint64 returns the integer value of a block nonce.
+// Uint64 返回块 nonce 的整数值。
 func (n BlockNonce) Uint64() uint64 {
 	return binary.BigEndian.Uint64(n[:])
 }
 
 // MarshalText encodes n as a hex string with 0x prefix.
+// MarshalText 将 n 编码为带有 0x 前缀的十六进制字符串。
 func (n BlockNonce) MarshalText() ([]byte, error) {
 	return hexutil.Bytes(n[:]).MarshalText()
 }
@@ -163,26 +167,30 @@ type Body struct {
 }
 
 // Block represents an entire block in the Ethereum blockchain.
+// Block 代表以太坊区块链中的整个区块。
 type Block struct {
 	header       *Header
 	uncles       []*Header
 	transactions Transactions
 
-	// caches
+	// caches 	缓存
 	hash atomic.Value
 	size atomic.Value
 
 	// Td is used by package core to store the total difficulty
 	// of the chain up to and including the block.
+	// 包核心使用 Td 来存储链的总难度，直到并包括该块。
 	td *big.Int
 
 	// These fields are used by package eth to track
 	// inter-peer block relay.
+	// eth 包使用这些字段来跟踪对等点间的块中继。
 	ReceivedAt   time.Time
 	ReceivedFrom interface{}
 }
 
 // "external" block encoding. used for eth protocol, etc.
+// “外部”块编码。用于 eth 协议等。
 type extblock struct {
 	Header *Header
 	Txs    []*Transaction
@@ -192,10 +200,12 @@ type extblock struct {
 // NewBlock creates a new block. The input data is copied,
 // changes to header and to the field values will not affect the
 // block.
+// NewBlock 创建一个新块。复制输入数据，更改标题和字段值不会影响块。
 //
 // The values of TxHash, UncleHash, ReceiptHash and Bloom in header
 // are ignored and set to values derived from the given txs, uncles
 // and receipts.
+// 标头中的 TxHash、UncleHash、ReceiptHash 和 Bloom 的值被忽略并设置为从给定的 txs、叔叔和收据派生的值。
 func NewBlock(header *Header, txs []*Transaction, uncles []*Header, receipts []*Receipt, hasher TrieHasher) *Block {
 	b := &Block{header: CopyHeader(header), td: new(big.Int)}
 

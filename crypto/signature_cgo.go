@@ -29,6 +29,7 @@ import (
 )
 
 // Ecrecover returns the uncompressed public key that created the given signature.
+// Ecrecover 返回创建给定签名的未压缩公钥
 func Ecrecover(hash, sig []byte) ([]byte, error) {
 	return secp256k1.RecoverPubkey(hash, sig)
 }
@@ -45,11 +46,14 @@ func SigToPub(hash, sig []byte) (*ecdsa.PublicKey, error) {
 }
 
 // Sign calculates an ECDSA signature.
+// Sign 计算 ECDSA 签名。
 //
 // This function is susceptible to chosen plaintext attacks that can leak
 // information about the private key that is used for signing. Callers must
 // be aware that the given digest cannot be chosen by an adversery. Common
 // solution is to hash any input before calculating the signature.
+// 此功能容易受到选择的明文攻击，这些攻击可能会泄露有关用于签名的私钥的信息。
+// 调用者必须意识到给定的摘要不能被反对者选择。常见的解决方案是在计算签名之前对任何输入进行哈希处理。
 //
 // The produced signature is in the [R || S || V] format where V is 0 or 1.
 func Sign(digestHash []byte, prv *ecdsa.PrivateKey) (sig []byte, err error) {
@@ -64,6 +68,8 @@ func Sign(digestHash []byte, prv *ecdsa.PrivateKey) (sig []byte, err error) {
 // VerifySignature checks that the given public key created signature over digest.
 // The public key should be in compressed (33 bytes) or uncompressed (65 bytes) format.
 // The signature should have the 64 byte [R || S] format.
+// VerifySignature 检查给定的公钥是否在摘要上创建了签名。
+// 公钥应采用压缩（33 字节）或未压缩（65 字节）格式。签名应该有 64 字节 [R || S] 格式。
 func VerifySignature(pubkey, digestHash, signature []byte) bool {
 	return secp256k1.VerifySignature(pubkey, digestHash, signature)
 }

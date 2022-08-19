@@ -30,9 +30,10 @@ import (
 
 // Account represents an Ethereum account located at a specific location defined
 // by the optional URL field.
+// Account 表示位于由可选 URL 字段定义的特定位置的以太坊帐户。
 type Account struct {
-	Address common.Address `json:"address"` // Ethereum account address derived from the key
-	URL     URL            `json:"url"`     // Optional resource locator within a backend
+	Address common.Address `json:"address"` // Ethereum account address derived from the key	由密钥派生的以太坊账户地址
+	URL     URL            `json:"url"`     // Optional resource locator within a backend		后端中的可选资源定位器
 }
 
 const (
@@ -44,65 +45,80 @@ const (
 
 // Wallet represents a software or hardware wallet that might contain one or more
 // accounts (derived from the same seed).
+// 钱包代表可能包含一个或多个帐户（源自同一个种子）的软件或硬件钱包。
 type Wallet interface {
 	// URL retrieves the canonical path under which this wallet is reachable. It is
 	// used by upper layers to define a sorting order over all wallets from multiple
 	// backends.
+	// URL 检索可以访问此钱包的规范路径。上层使用它来定义来自多个后端的所有钱包的排序顺序。
 	URL() URL
 
 	// Status returns a textual status to aid the user in the current state of the
 	// wallet. It also returns an error indicating any failure the wallet might have
 	// encountered.
+	// Status 返回文本状态以帮助用户了解钱包的当前状态。它还返回一个错误，指示钱包可能遇到的任何故障。
 	Status() (string, error)
 
 	// Open initializes access to a wallet instance. It is not meant to unlock or
 	// decrypt account keys, rather simply to establish a connection to hardware
 	// wallets and/or to access derivation seeds.
+	// Open 初始化对钱包实例的访问。它并不意味着解锁或解密帐户密钥，而只是建立与硬件钱包的连接和或访问派生种子。
 	//
 	// The passphrase parameter may or may not be used by the implementation of a
 	// particular wallet instance. The reason there is no passwordless open method
 	// is to strive towards a uniform wallet handling, oblivious to the different
 	// backend providers.
+	// 密码短语参数可能会或可能不会被特定钱包实例的实现使用。没有无密码打开方法的原因是努力实现统一的钱包处理，忽略不同的后端提供商。
 	//
 	// Please note, if you open a wallet, you must close it to release any allocated
 	// resources (especially important when working with hardware wallets).
+	// 请注意，如果您打开一个钱包，您必须关闭它以释放任何分配的资源（在使用硬件钱包时尤其重要）。
 	Open(passphrase string) error
 
 	// Close releases any resources held by an open wallet instance.
+	// 关闭释放打开的钱包实例持有的任何资源。
 	Close() error
 
 	// Accounts retrieves the list of signing accounts the wallet is currently aware
 	// of. For hierarchical deterministic wallets, the list will not be exhaustive,
 	// rather only contain the accounts explicitly pinned during account derivation.
+	// Accounts 检索钱包当前知道的签名帐户列表。对于分层确定性钱包，该列表并不详尽，而仅包含在帐户派生期间明确固定的帐户。
 	Accounts() []Account
 
 	// Contains returns whether an account is part of this particular wallet or not.
+	// 包含返回一个帐户是否是此特定钱包的一部分。
 	Contains(account Account) bool
 
 	// Derive attempts to explicitly derive a hierarchical deterministic account at
 	// the specified derivation path. If requested, the derived account will be added
 	// to the wallet's tracked account list.
+	// Derive 尝试在指定的派生路径上显式派生分层确定性帐户。如果请求，派生账户将被添加到钱包的跟踪账户列表中。
 	Derive(path DerivationPath, pin bool) (Account, error)
 
 	// SelfDerive sets a base account derivation path from which the wallet attempts
 	// to discover non zero accounts and automatically add them to list of tracked
 	// accounts.
+	// SelfDerive 设置一个基本账户派生路径，钱包试图从中发现非零账户并自动将它们添加到跟踪账户列表中。
 	//
 	// Note, self derivation will increment the last component of the specified path
 	// opposed to descending into a child path to allow discovering accounts starting
 	// from non zero components.
+	// 请注意，自派生将增加指定路径的最后一个组件，而不是下降到子路径，以允许从非零组件开始发现帐户。
 	//
 	// Some hardware wallets switched derivation paths through their evolution, so
 	// this method supports providing multiple bases to discover old user accounts
 	// too. Only the last base will be used to derive the next empty account.
+	// 一些硬件钱包在进化过程中切换了衍生路径，因此该方法也支持提供多个基础来发现旧用户帐户。只有最后一个基数将用于派生下一个空帐户。
 	//
 	// You can disable automatic account discovery by calling SelfDerive with a nil
 	// chain state reader.
+	// 您可以通过使用零链状态读取器调用 SelfDerive 来禁用自动帐户发现。
 	SelfDerive(bases []DerivationPath, chain ethereum.ChainStateReader)
 
 	// SignData requests the wallet to sign the hash of the given data
 	// It looks up the account specified either solely via its address contained within,
 	// or optionally with the aid of any location metadata from the embedded URL field.
+	// SignData 请求钱包对给定数据的散列进行签名。它仅通过包含在其中的地址或可选地借助嵌入 URL 字段中的任何位置元数据来查找指定的帐户。
 	//
 	// If the wallet requires additional authentication to sign the request (e.g.
 	// a password to decrypt the account, or a PIN code to verify the transaction),
@@ -110,12 +126,16 @@ type Wallet interface {
 	// about which fields or actions are needed. The user may retry by providing
 	// the needed details via SignDataWithPassphrase, or by other means (e.g. unlock
 	// the account in a keystore).
+	// 如果钱包需要额外的身份验证来签署请求（例如，解密帐户的密码或验证交易的 PIN 码），将返回一个 AuthNeededError 实例，其中包含用户需要哪些字段或操作的信息。
+	// 用户可以通过 SignDataWithPassphrase 或其他方式（例如在密钥库中解锁帐户）提供所需的详细信息来重试。
 	SignData(account Account, mimeType string, data []byte) ([]byte, error)
 
 	// SignDataWithPassphrase is identical to SignData, but also takes a password
 	// NOTE: there's a chance that an erroneous call might mistake the two strings, and
 	// supply password in the mimetype field, or vice versa. Thus, an implementation
 	// should never echo the mimetype or return the mimetype in the error-response
+	// SignDataWithPassphrase 与 SignData 相同，但也需要一个密码 注意：错误的调用可能会弄错两个字符串，并在 mimetype 字段中提供密码，反之亦然。
+	// 因此，实现不应该回显 mimetype 或在错误响应中返回 mimetype
 	SignDataWithPassphrase(account Account, passphrase, mimeType string, data []byte) ([]byte, error)
 
 	// SignText requests the wallet to sign the hash of a given piece of data, prefixed
